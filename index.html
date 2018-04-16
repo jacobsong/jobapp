@@ -1,23 +1,51 @@
 <html>
 <head>
     <title>Job Applications</title>
+    <link href="https://fonts.googleapis.com/css?family=Boogaloo|Fredoka+One|Rajdhani" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script defer src="main.js"></script>
 </head>
 <body onload="fetchApps()">
-    <header>
-        Keep track of your job applications!
-    </header>
-    
-    <form class="jobform" id="jobform">
-        <label>Req ID:</label><input type="text" id="reqid">
-        <label>Job Title:</label><input type="text" id="jobtitle">
-        <label>Application Date:</label><input type="text" id="appdate">
-        <button type="submit" class="btn">Submit</button>
-    </form>
 
-    <div id="history" class="history">
+    <div class="grid-container">
+        <div class="top-box">
+            <h1>Keep track of your job applications!</h1>
+        </div>
+        
+        <div class="job-form">
+            <form>
+                <input type="text" id="company" placeholder="Company Name">
+                <input type="text" id="reqid" placeholder="Req ID">
+                <input type="text" id="jobtitle" placeholder="Job Title">
+                <input type="text" id="email" placeholder="Recruiter's email">
+                <input type="date" id="appdate" placeholder="MM/DD/YYYY" min="1899-01-01" max="2000-13-13">
+                <select name="status" id="status" placeholder="Status">
+                    <option value="step1">Application Pending</option>
+                    <option value="step2">Phone Interview Scheduled</option>
+                    <option value="step3">Phone Interview Completed</option>
+                    <option value="step4">Onsite Interview Scheduled</option>
+                    <option value="step5">Onsite Interview Completed</option>
+                    <option value="step6">Not Selected</option>
+                    <option value="step7">Received Offer</option>
+                </select>
+                <input type="reset" class="btn" id="reset-button">
+                <input type="button" class="btn" id="submit-button" onclick="fetchApps" value="Submit">
+            </form>
+        </div>
 
+        <div class="history">
+            <table>
+                <tbody>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Req ID</th>
+                        <th>Job Title</th>
+                        <th>Recruiter's email</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
+
 </body>
 </html>
