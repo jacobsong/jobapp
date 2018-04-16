@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>Job Applications</title>
+    <link rel="stylesheet" href="style.css">
+    <script defer src="main.js"></script>
+</head>
+<body onload="fetchApps()">
+    <header>
+        Keep track of your job applications!
+    </header>
+    
+    <form class="jobform" id="jobform">
+        <label>Req ID:</label><input type="text" id="reqid">
+        <label>Job Title:</label><input type="text" id="jobtitle">
+        <label>Application Date:</label><input type="text" id="appdate">
+        <button type="submit" class="btn">Submit</button>
+    </form>
+
+    <div id="history" class="history">
+
+    </div>
+</body>
+</html>
