@@ -2,51 +2,66 @@
 <head>
     <title>Job Applications</title>
     <link rel="icon" href="favicon.png">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Boogaloo|Fredoka+One|Rajdhani">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Boogaloo|Fredoka+One">
     <link rel="stylesheet" href="style.css">
     <script defer src="main.js"></script>
 </head>
 <body>
-
     <div class="grid-container">
         <div class="top-box">
             <h1>Keep track of your job applications!</h1>
         </div>
-        
+        <!-- End of top-box -->
+
         <div class="job-form">
-            <form>
+            <form id="form-input">
                 <input type="text" id="company" placeholder="Company Name">
                 <input type="text" id="reqid" placeholder="Req ID">
                 <input type="text" id="jobtitle" placeholder="Job Title">
+                <input type="text" id="joburl" placeholder="URL To Job Posting">
                 <input type="text" id="email" placeholder="Recruiter's Email">
                 <input type="text" id="appdate" placeholder="Application Date" min="1899-01-01" max="2200-12-12" onfocus="(this.type='date')" onblur="(this.type='text')">
                 <select name="status" id="status" placeholder="Status">
-                    <option value="step1">Application Pending</option>
-                    <option value="step2">Phone Interview Scheduled</option>
-                    <option value="step3">Phone Interview Completed</option>
-                    <option value="step4">Onsite Interview Scheduled</option>
-                    <option value="step5">Onsite Interview Completed</option>
-                    <option value="step6">Not Selected</option>
-                    <option value="step7">Received Offer</option>
+                    <option value="Application Pending">Application Pending</option>
+                    <option value="Phone Interview Scheduled">Phone Interview Scheduled</option>
+                    <option value="Phone Interview Completed">Phone Interview Completed</option>
+                    <option value="Onsite Interview Scheduled">Onsite Interview Scheduled</option>
+                    <option value="Onsite Interview Completed">Onsite Interview Completed</option>
+                    <option value="Not Selected">Not Selected</option>
+                    <option value="Received Offer">Received Offer</option>
                 </select>
                 <input type="reset" class="btn" id="reset-button">
                 <input type="button" class="btn" id="submit-button" value="Submit">
             </form>
         </div>
+        <!-- End of job-form -->
 
         <div class="history">
             <table>
-                <tbody>
+                <thead>
                     <tr>
                         <th>Company Name</th>
                         <th>Req ID</th>
                         <th>Job Title</th>
-                        <th>Recruiter's email</th>
+                        <th>URL</th>
+                        <th>Recruiter's Email</th>
+                        <th>Application Date</th>
+                        <th>Status</th>
+                        <th colspan="2">Action</th>
                     </tr>
+                </thead>
+                <tbody id="data">
                 </tbody>
             </table>
         </div>
+        <!-- End of history -->
+
     </div>
+    <!-- End of grid-container -->
+
+    <footer class="footer">
+        Developer: Jacob Song &copy; 2018
+    </footer>
 
 </body>
 </html>
