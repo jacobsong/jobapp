@@ -21,8 +21,8 @@ function setMaxDate() {
     document.getElementById("appdate").setAttribute("max", today);
 }
 
-function validateForm(comp, req, title, url, email, date) {
-    if (comp === "" || req === "" || title === "" || url === "" || date === "") {
+function validateForm(comp, req, title, email, date) {
+    if (comp === "" || req === "" || title === "" || date === "") {
         alert("You must fill out Company Name, Req ID, Job Title, URL To Job Posting, and Date");
         return false;
     }
@@ -30,18 +30,6 @@ function validateForm(comp, req, title, url, email, date) {
         var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         if (!re.test(String(email).toLowerCase())) {
             alert("You must enter a valid email format");
-            return false;
-        }
-    }
-    if (url != "") {
-        var pattern = new RegExp('^(https?:\/\/)?'+ // protocol
-            '((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|'+ // domain name
-            '((\d{1,3}\.){3}\d{1,3}))'+ // OR ip (v4) address
-            '(\:\d+)?(\/[-a-z\d%_.~+]*)*'+ // port and path
-            '(\?[;&a-z\d%_.~+=-]*)?'+ // query string
-            '(\#[-a-z\d_]*)?$','i'); // fragment locater
-        if(!pattern.test(url)) {
-            alert("Please enter a valid URL");
             return false;
         }
     }
@@ -74,7 +62,7 @@ function saveApp() {
     var appdate = document.getElementById("appdate").value;
     var status = document.getElementById("status").value;
 
-    if (!validateForm(company, reqid, jobtitle, joburl, email, appdate)) {
+    if (!validateForm(company, reqid, jobtitle, email, appdate)) {
         return false;
     }
 
@@ -123,6 +111,87 @@ function deleteApp(id) {
     fetchApps();
 }
 
+function editApp(id) {
+    // fetch the data to be edited
+    var apps = JSON.parse(localStorage.getItem("apps"));
+
+    // find the item to be edited
+    for (var i = 0; i < apps.length; i++) {
+        if (apps[i].id == id) {
+            var url = apps[i].url;
+            var date = apps[i].date;
+            var status = apps[i].status;
+        }
+    }
+    // change the row to be input forms
+    var row = document.getElementById("jobid" + id);
+    for (var i = 0; i <= 3; i++) {
+        var cellValue = row.cells[i].innerHTML;
+        row.cells[i].innerHTML = 
+            "<input type='text' id='cell" + i + "jobid" + id + "' value='" + cellValue + "'>";
+    }
+    // date cell needs different formatting
+    row.cells[4].innerHTML =
+        "<input type='text' id='cell" + 4 + "jobid" + id + "' value='" + date + 
+        "' min='1899-01-01' max='2200-12-12' onfocus='(this.type='date')' onblur='(this.type='text')'>";
+    
+    // status cell needs to be a dropdown
+    var statusHTML =
+        "<select name='edit-status'id='cell" + 5 + "jobid" + id + "'>" +
+            "<option value='Application Pending'>Application Pending</option>" +
+            "<option value='Phone Interview Completed'>Phone Interview Completed</option>" +
+            "<option value='Phone Interview Scheduled'>Phone Interview Scheduled</option>" +
+            "<option value='Onsite Interview Scheduled'>Onsite Interview Scheduled</option>" +
+            "<option value='Onsite Interview Completed'>Onsite Interview Completed</option>" +
+            "<option value='Not Selected'>Not Selected</option>" +
+            "<option value='Received Offer'>Received Offer</option>" +
+        "</select>";
+    statusHTML = statusHTML.replace("'" + status + "'", "'" + status + "'" + " selected");
+    row.cells[5].innerHTML = statusHTML;
+
+    // url cell
+    row.cells[6].innerHTML = "<input type='text' id='cell" + 6 + "jobid" + id + "' value='" + url + "'>";
+    
+    // change edit button to save button
+    row.cells[7].innerHTML = "<button class='table-btn btn-edit-save' id='btn-edit-save" + id + "' onclick='saveEdit(" + id + ")'>Save</button>";
+}
+
+function saveEdit(id) {
+    // retrieve form data
+    var company = document.getElementById("cell" + 0 + "jobid" + id).value;
+    var reqid = document.getElementById("cell" + 1 + "jobid" + id).value;
+    var jobtitle = document.getElementById("cell" + 2 + "jobid" + id).value;
+    var email = document.getElementById("cell" + 3 + "jobid" + id).value;
+    var appdate = document.getElementById("cell" + 4 + "jobid" + id).value;
+    var status = document.getElementById("cell" + 5 + "jobid" + id).value;
+    var joburl = document.getElementById("cell" + 6 + "jobid" + id).value;
+
+    // validate data
+    if (!validateForm(company, reqid, jobtitle, email, appdate)) {
+        return false;
+    }
+    
+    // find the item to be edited
+    var apps = JSON.parse(localStorage.getItem("apps"));
+    for (var i = 0; i < apps.length; i++) {
+        if (apps[i].id == id) {
+            apps[i].company = company;
+            apps[i].title = jobtitle;
+            apps[i].req = reqid;
+            apps[i].url = joburl;
+            apps[i].email = email;
+            apps[i].date = appdate;
+            apps[i].status = status;
+        }
+    }
+
+    // save edits to local storage
+    localStorage.setItem("apps", JSON.stringify(apps));
+
+    // refresh table
+    fetchApps();
+}
+
 function fetchApps() {
     var apps = JSON.parse(localStorage.getItem("apps"));
     var data = document.getElementById("data");
@@ -139,15 +208,15 @@ function fetchApps() {
             var date = apps[i].date;
             var status = apps[i].status;
             data.innerHTML += 
-                "<tr>" + 
+                "<tr id='jobid" + id + "'>" + 
                     "<td>" + company + "</td>" +
                     "<td>" + req + "</td>" +
                     "<td>" + title + "</td>" +
-                    "<td><a class='table-btn' id='url' href='" + url + "' target='_blank'>Link</a></td>" +
                     "<td>" + email + "</td>" +
                     "<td>" + date + "</td>" +
                     "<td>" + status + "</td>" +
-                    "<td><button class='table-btn' id='btn-edit' onclick='editApp(" + id + ")'>Edit</button></td>" +
+                    "<td><a class='table-btn' id='url' href='" + url + "' target='_blank'>Link</a></td>" +
+                    "<td><button class='table-btn btn-edit-save' id='btn-edit-save" + id + "' onclick='editApp(" + id + ")'>Edit</button></td>" +
                     "<td><button class='table-btn' id='btn-delete' onclick='deleteApp(" + id + ")'>Delete</button></td>" +
                 "</tr>"
                 ;

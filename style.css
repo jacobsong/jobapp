@@ -76,11 +76,11 @@ body {
     border: solid 1px;
 }
 
-#submit-button, #btn-edit {
+#submit-button {
     background-color: #4CAF50;
 }
 
-#submit-button:hover, #btn-edit:hover {
+#submit-button:hover {
     background-color: #45a049;
 }
 
@@ -92,10 +92,22 @@ body {
     background-color: rgb(192, 21, 55);
 }
 
+.btn-edit-save {
+    background-color: #4CAF50;
+}
+
+.btn-edit-save:hover {
+    background-color: #45a049;
+}
+
 #url {
     background-color: rgb(82, 135, 179);
     text-decoration: none;
     font-size: 0.6em;
+}
+
+#url:hover {
+    background-color: rgb(70, 116, 155);
 }
 
 .history {
