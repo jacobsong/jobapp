@@ -2,11 +2,12 @@
 document.getElementById("submit-button").addEventListener("click", saveApp);
 
 document.body.onload = function() {
-    setMaxDate();
+    var today = getMaxDate();
+    document.getElementById("appdate").setAttribute("max", today);
     fetchApps();
 }
 
-function setMaxDate() {
+function getMaxDate() {
     var today = new Date();
     var dd = today.getDate();
     var mm = today.getMonth()+1; //January is 0!
@@ -18,7 +19,7 @@ function setMaxDate() {
         mm = '0' + mm
     } 
     today = yyyy+'-'+mm+'-'+dd;
-    document.getElementById("appdate").setAttribute("max", today);
+    return today;
 }
 
 function validateForm(comp, req, title, email, date) {
@@ -74,10 +75,10 @@ function saveApp() {
         company: company,
         req: reqid,
         title: jobtitle,
-        url: joburl,
         email: email,
         date: appdate,
-        status: status
+        status: status,
+        url: joburl
     }
 
     if (localStorage.getItem("apps") === null) {
@@ -118,42 +119,82 @@ function editApp(id) {
     // find the item to be edited
     for (var i = 0; i < apps.length; i++) {
         if (apps[i].id == id) {
-            var url = apps[i].url;
+            var company = apps[i].company;
+            var req = apps[i].req;
+            var title = apps[i].title;
+            var email = apps[i].email;
             var date = apps[i].date;
             var status = apps[i].status;
+            var url = apps[i].url;
         }
     }
     // change the row to be input forms
     var row = document.getElementById("jobid" + id);
-    for (var i = 0; i <= 3; i++) {
-        var cellValue = row.cells[i].innerHTML;
-        row.cells[i].innerHTML = 
-            "<input type='text' id='cell" + i + "jobid" + id + "' value='" + cellValue + "'>";
-    }
-    // date cell needs different formatting
-    row.cells[4].innerHTML =
-        "<input type='text' id='cell" + 4 + "jobid" + id + "' value='" + date + 
-        "' min='1899-01-01' max='2200-12-12' onfocus='(this.type='date')' onblur='(this.type='text')'>";
-    
-    // status cell needs to be a dropdown
-    var statusHTML =
-        "<select name='edit-status'id='cell" + 5 + "jobid" + id + "'>" +
-            "<option value='Application Pending'>Application Pending</option>" +
-            "<option value='Phone Interview Completed'>Phone Interview Completed</option>" +
-            "<option value='Phone Interview Scheduled'>Phone Interview Scheduled</option>" +
-            "<option value='Onsite Interview Scheduled'>Onsite Interview Scheduled</option>" +
-            "<option value='Onsite Interview Completed'>Onsite Interview Completed</option>" +
-            "<option value='Not Selected'>Not Selected</option>" +
-            "<option value='Received Offer'>Received Offer</option>" +
-        "</select>";
-    statusHTML = statusHTML.replace("'" + status + "'", "'" + status + "'" + " selected");
-    row.cells[5].innerHTML = statusHTML;
+    for (var i = 0; i <= 7; i++) {
+        var cellValue;
+        var cellId =  "cell" + i + "jobid" + id;
+        var newHTML;
+        
+        switch (i) { // use cellValue to prepopulate inputs with existing values
+            case 0: cellValue = company; break;
+            case 1: cellValue = req; break;
+            case 2: cellValue = title; break;
+            case 3: cellValue = email; break;
+            case 4: cellValue = date; break;
+            case 5: cellValue = status; break;
+            case 6: cellValue = url; break;
+            case 7: cellValue = ""; break;
+        }
 
-    // url cell
-    row.cells[6].innerHTML = "<input type='text' id='cell" + 6 + "jobid" + id + "' value='" + url + "'>";
-    
-    // change edit button to save button
-    row.cells[7].innerHTML = "<button class='table-btn btn-edit-save' id='btn-edit-save" + id + "' onclick='saveEdit(" + id + ")'>Save</button>";
+        if (i <= 3 || i === 6) { // company, req, title, email, url are text inputs
+            newHTML = document.createElement("input");
+            newHTML.setAttribute("type", "text");
+            newHTML.setAttribute("id", cellId);
+            newHTML.setAttribute("value", cellValue);
+        }
+
+        else if (i === 4) { // date cell needs different formatting
+            newHTML = document.createElement("input");
+            newHTML.setAttribute("type", "text");
+            newHTML.setAttribute("id", cellId);
+            newHTML.setAttribute("value", cellValue);
+            newHTML.setAttribute("min", "1899-01-01");
+            newHTML.setAttribute("max", getMaxDate());
+            newHTML.setAttribute("onfocus", "this.type='date'");
+            newHTML.setAttribute("onblur", "this.type='text'");
+        }
+
+        else if (i === 5) { // status cell needs to be a dropdown
+            var options = ["Application Pending", "Phone Interview Scheduled", "Phone Interview Completed", 
+                "Onsite Interview Scheduled", "Onsite Interview Completed", "Not Selected", "Received Offer"]
+            
+            newHTML = document.createElement("select");
+            newHTML.setAttribute("id", "cell" + i + "jobid" + id);
+
+            for(var val of options) {
+                var option = document.createElement("option");
+                option.setAttribute("value", val);
+                option.textContent = val;
+                if (val === status) {
+                    option.setAttribute("selected", "selected");
+                }
+                newHTML.appendChild(option);
+            }
+        }
+
+        else if (i === 7) { // change edit button to save button
+            newHTML = document.createElement("button");
+            newHTML.setAttribute("class", "table-btn btn-edit-save");
+            newHTML.setAttribute("id", "btn-edit-save" + id);
+            newHTML.setAttribute("onclick", "saveEdit(" + id + ")");
+            newHTML.textContent = "Save";
+        }
+
+        while (row.cells[i].firstChild) { // remove existing children then add new child
+            row.cells[i].removeChild(row.cells[i].firstChild);
+        }
+        row.cells[i].appendChild(newHTML);
+    }
 }
 
 function saveEdit(id) {
@@ -195,31 +236,59 @@ function saveEdit(id) {
 function fetchApps() {
     var apps = JSON.parse(localStorage.getItem("apps"));
     var data = document.getElementById("data");
-    data.innerHTML = "";
+    
+    while (data.firstChild) { // remove existing children then add new child
+        data.removeChild(data.firstChild);
+    }
 
     if (apps != null) {
-        for (var i = 0; i < apps.length; i++) {
-            var id = apps[i].id;
-            var company = apps[i].company;
-            var req = apps[i].req;
-            var title = apps[i].title;
-            var url = apps[i].url;
-            var email = apps[i].email;
-            var date = apps[i].date;
-            var status = apps[i].status;
-            data.innerHTML += 
-                "<tr id='jobid" + id + "'>" + 
-                    "<td>" + company + "</td>" +
-                    "<td>" + req + "</td>" +
-                    "<td>" + title + "</td>" +
-                    "<td>" + email + "</td>" +
-                    "<td>" + date + "</td>" +
-                    "<td>" + status + "</td>" +
-                    "<td><a class='table-btn' id='url' href='" + url + "' target='_blank'>Link</a></td>" +
-                    "<td><button class='table-btn btn-edit-save' id='btn-edit-save" + id + "' onclick='editApp(" + id + ")'>Edit</button></td>" +
-                    "<td><button class='table-btn' id='btn-delete' onclick='deleteApp(" + id + ")'>Delete</button></td>" +
-                "</tr>"
-                ;
+        for (var app of apps) {
+            var rowHTML = document.createElement("tr");
+            rowHTML.setAttribute("id", "jobid" + app["id"]);
+            for (var property in app) {
+                if (property === "id") {
+                    // do nothing
+                }
+                else if (property === "url") {
+                    var cellHTML = document.createElement("td");
+                    var linkHTML = document.createElement("a");
+                    linkHTML.setAttribute("rel", "external");
+                    linkHTML.setAttribute("class", "table-btn");
+                    linkHTML.setAttribute("id", "url");
+                    linkHTML.setAttribute("href", app[property]);
+                    linkHTML.setAttribute("target", "_blank");
+                    linkHTML.textContent = "Link";
+                    cellHTML.appendChild(linkHTML);
+                    rowHTML.appendChild(cellHTML);
+                }
+                else {
+                    var cellHTML = document.createElement("td");
+                    cellHTML.textContent = app[property];
+                    rowHTML.appendChild(cellHTML);
+                }
+            }
+            var editHTML = document.createElement("td");
+            var deleteHTML = document.createElement("td");
+            var editBtn = document.createElement("button");
+            var deleteBtn = document.createElement("button");
+
+            editBtn.setAttribute("class", "table-btn btn-edit-save");
+            editBtn.setAttribute("id", "btn-edit-save" + app["id"]);
+            editBtn.setAttribute("onclick", "editApp('" + app["id"] + "')");
+            editBtn.textContent = "Edit";
+
+            deleteBtn.setAttribute("class", "table-btn");
+            deleteBtn.setAttribute("id", "btn-delete");
+            deleteBtn.setAttribute("onclick", "deleteApp('" + app["id"] + "')");
+            deleteBtn.textContent = "Delete";
+
+            editHTML.appendChild(editBtn);
+            rowHTML.appendChild(editHTML);
+
+            deleteHTML.appendChild(deleteBtn);
+            rowHTML.appendChild(deleteHTML);
+
+            data.appendChild(rowHTML);
         }
     }
 }
